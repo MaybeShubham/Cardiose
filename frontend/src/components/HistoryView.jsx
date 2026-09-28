@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History, Heart, Droplets, RefreshCw, Calendar, FileText } from 'lucide-react';
+import { History, Heart, Droplets, RefreshCw, Calendar, FileText, Trash2 } from 'lucide-react';
 
 export default function HistoryView({ apiBaseUrl }) {
   const [history, setHistory] = useState([]);
@@ -19,6 +19,36 @@ export default function HistoryView({ apiBaseUrl }) {
       console.error('Error fetching history:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteItem = async (id, e) => {
+    e?.stopPropagation?.();
+    if (!id) return;
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/history/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setHistory(prev => prev.filter(item => item.id !== id));
+        if (selectedItem?.id === id) {
+          setSelectedItem(null);
+        }
+      }
+    } catch (err) {
+      console.error('Error deleting screening record:', err);
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (history.length === 0) return;
+    if (!window.confirm('Are you sure you want to clear all screening records?')) return;
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/history`, { method: 'DELETE' });
+      if (res.ok) {
+        setHistory([]);
+        setSelectedItem(null);
+      }
+    } catch (err) {
+      console.error('Error clearing screening history:', err);
     }
   };
 
@@ -88,6 +118,17 @@ export default function HistoryView({ apiBaseUrl }) {
             </button>
           </div>
 
+          {history.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 transition-all border border-rose-200 flex items-center space-x-1.5 shadow-xs"
+              title="Clear all screening history"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+              <span>Clear Log</span>
+            </button>
+          )}
+
           <button
             onClick={fetchHistory}
             disabled={isLoading}
@@ -118,7 +159,7 @@ export default function HistoryView({ apiBaseUrl }) {
                 <th className="px-4 py-3.5 font-bold">Triangulated Risk</th>
                 <th className="px-4 py-3.5 font-bold">Model Agreement (LR / RF / NB)</th>
                 <th className="px-4 py-3.5 font-bold">Drivers Flagged</th>
-                <th className="px-4 py-3.5 font-bold text-right">Details</th>
+                <th className="px-4 py-3.5 font-bold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-normal">
@@ -162,12 +203,21 @@ export default function HistoryView({ apiBaseUrl }) {
                       {item.evidence_points?.length || 0} biological marker(s)
                     </td>
                     <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedItem(item)}
-                        className="px-3 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all border border-slate-200"
-                      >
-                        Inspect
-                      </button>
+                      <div className="flex items-center justify-end space-x-1.5">
+                        <button
+                          onClick={() => setSelectedItem(item)}
+                          className="px-3 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all border border-slate-200"
+                        >
+                          Inspect
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteItem(item.id, e)}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all border border-transparent hover:border-rose-200"
+                          title="Delete screening record"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -190,12 +240,22 @@ export default function HistoryView({ apiBaseUrl }) {
                   {selectedItem.disease_type} Screening Audit #{selectedItem.id ? selectedItem.id.substring(0, 8) : 'RECORD'}
                 </span>
               </div>
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="text-slate-500 hover:text-slate-900 text-sm px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
-              >
-                ✕ Close
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleDeleteItem(selectedItem.id)}
+                  className="text-rose-600 hover:text-rose-700 text-xs px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors flex items-center space-x-1 font-semibold"
+                  title="Delete this record"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+                <button
+                  onClick={() => setSelectedItem(null)}
+                  className="text-slate-500 hover:text-slate-900 text-sm px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors font-semibold"
+                >
+                  ✕ Close
+                </button>
+              </div>
             </div>
 
             <div>

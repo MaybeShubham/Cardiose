@@ -16,7 +16,7 @@ from app.schemas import (
 )
 from app.inference import model_manager
 from app.explainer import explain_heart, explain_diabetes
-from app.db import log_screening, get_history
+from app.db import log_screening, get_history, delete_screening, clear_all_history
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -128,4 +128,26 @@ async def history(limit: int = 50):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error querying screening history: {str(e)}"
+        )
+
+@app.delete("/api/history/{record_id}", tags=["Audit Log"])
+async def delete_history_item(record_id: str):
+    try:
+        await delete_screening(record_id)
+        return {"status": "deleted", "id": record_id}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting screening record: {str(e)}"
+        )
+
+@app.delete("/api/history", tags=["Audit Log"])
+async def delete_all_history():
+    try:
+        await clear_all_history()
+        return {"status": "cleared", "message": "All screening history cleared."}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error clearing screening history: {str(e)}"
         )

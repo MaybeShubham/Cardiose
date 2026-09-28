@@ -79,3 +79,28 @@ async def get_history(limit: int = 50) -> List[Dict[str, Any]]:
             print(f"⚠ Supabase query failed: {e}. Falling back to in-memory history.")
 
     return _IN_MEMORY_HISTORY[:limit]
+
+async def delete_screening(record_id: str) -> bool:
+    """Delete a single screening record by ID."""
+    global _IN_MEMORY_HISTORY
+    _IN_MEMORY_HISTORY = [r for r in _IN_MEMORY_HISTORY if r.get("id") != record_id]
+    if _supabase_client:
+        try:
+            _supabase_client.table("cardiose_screening_history").delete().eq("id", record_id).execute()
+            return True
+        except Exception as e:
+            print(f"⚠ Supabase delete failed: {e}")
+    return True
+
+async def clear_all_history() -> bool:
+    """Clear all historical screening records."""
+    global _IN_MEMORY_HISTORY
+    _IN_MEMORY_HISTORY.clear()
+    if _supabase_client:
+        try:
+            # Delete all rows where risk_score is greater than or equal to 0
+            _supabase_client.table("cardiose_screening_history").delete().gte("risk_score", 0).execute()
+            return True
+        except Exception as e:
+            print(f"⚠ Supabase clear all failed: {e}")
+    return True
