@@ -18,7 +18,7 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
           badgeBg: 'bg-rose-100 text-rose-800 border-rose-200',
           strokeColor: '#e11d48',
           icon: <AlertOctagon className="w-5 h-5 text-rose-600" />,
-          description: 'High Risk Profile: Multiple aberrant biomarkers indicate elevated probability of cardiovascular/metabolic pathology.'
+          description: "Several of this patient's readings are outside safe ranges. A doctor should review this soon."
         };
       case 'MODERATE':
         return {
@@ -28,7 +28,7 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
           badgeBg: 'bg-amber-100 text-amber-800 border-amber-200',
           strokeColor: '#d97706',
           icon: <AlertTriangle className="w-5 h-5 text-amber-600" />,
-          description: 'Moderate Risk Profile: Borderline biometrics observed. Proactive lifestyle intervention recommended.'
+          description: 'Some readings are borderline. Lifestyle changes now can significantly lower this risk.'
         };
       case 'LOW':
       default:
@@ -39,7 +39,7 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
           badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-200',
           strokeColor: '#059669',
           icon: <ShieldCheck className="w-5 h-5 text-emerald-600" />,
-          description: 'Low Risk Profile: Biometrics adhere to normal physiological thresholds. Continue routine health maintenance.'
+          description: 'All readings look healthy. Keep up the good habits and schedule routine check-ups.'
         };
     }
   };
@@ -52,7 +52,7 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
         <div className="flex items-center space-x-2">
           <HeartPulse className="w-5 h-5 text-slate-500" />
           <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
-            Triangulated Risk Gauge
+            Risk Score
           </h3>
         </div>
         <span className={`px-2.5 py-1 text-xs font-bold rounded-full border flex items-center space-x-1.5 ${theme.badgeBg}`}>
@@ -103,20 +103,19 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
             <span className="text-slate-400 text-sm font-medium ml-1">/ 100</span>
           </div>
           <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
-            Consensus Risk Index
+            Risk Score
           </span>
         </div>
       </div>
 
-      {/* Triage Summary */}
+      {/* Plain-English Triage Summary */}
       <p className="text-xs text-slate-600 text-center mt-3 max-w-sm mx-auto leading-relaxed font-medium">
         {theme.description}
       </p>
 
-      {/* Sensitivity Disclaimer */}
-      <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-        <span>Target: {diseaseType}</span>
-        <span className="text-teal-700 font-semibold">High Sensitivity (Recall Optimized)</span>
+      {/* Footer */}
+      <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-center text-[11px] text-slate-500 font-medium">
+        <span>Screening for: {diseaseType}</span>
       </div>
     </div>
   );

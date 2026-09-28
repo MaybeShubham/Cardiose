@@ -216,24 +216,42 @@ export default function App() {
             <section
               ref={resultsRef}
               id="diagnostic-report-section"
-              className="mt-8 pt-8 border-t border-slate-200 space-y-6 scroll-mt-6"
+              className="mt-8 pt-8 border-t border-slate-200 space-y-6 scroll-mt-6 animate-fadeIn"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border shadow-sm ${
+                result.risk_level === 'HIGH'
+                  ? 'bg-rose-50 border-rose-200'
+                  : result.risk_level === 'MODERATE'
+                  ? 'bg-amber-50 border-amber-200'
+                  : 'bg-emerald-50 border-emerald-200'
+              }`}>
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold shrink-0">
-                    <Activity className="w-5 h-5 text-blue-600" />
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                    result.risk_level === 'HIGH'
+                      ? 'bg-rose-100'
+                      : result.risk_level === 'MODERATE'
+                      ? 'bg-amber-100'
+                      : 'bg-emerald-100'
+                  }`}>
+                    <Activity className={`w-5 h-5 ${
+                      result.risk_level === 'HIGH'
+                        ? 'text-rose-600'
+                        : result.risk_level === 'MODERATE'
+                        ? 'text-amber-600'
+                        : 'text-emerald-600'
+                    }`} />
                   </div>
                   <div>
                     <div className="flex items-center space-x-2">
                       <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                        Diagnostic Results & Clinical Recommendations
+                        Screening Complete — {result.risk_level} RISK
                       </h2>
-                      <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                      <span className="text-xs font-semibold text-slate-600 bg-white/70 px-2.5 py-0.5 rounded-full border border-slate-200">
                         {resultType}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Triangulated multi-estimator consensus score and explainable heuristic flags
+                      Risk score from 3 AI models — plus what caused the flag and what to do next.
                     </p>
                   </div>
                 </div>
@@ -242,21 +260,21 @@ export default function App() {
                   <button
                     type="button"
                     onClick={scrollToTop}
-                    className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 transition-colors flex items-center space-x-1.5"
+                    className="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold text-xs border border-slate-200 transition-colors flex items-center space-x-1.5"
                     title="Scroll up to edit inputs"
                   >
                     <ArrowUp className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Edit Parameters</span>
+                    <span>Edit Inputs</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setIsReportModalOpen(true)}
-                    className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs border border-blue-200 transition-colors flex items-center space-x-1.5"
+                    className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs border border-blue-700 transition-colors flex items-center space-x-1.5 shadow-sm"
                     title="Open report in focused modal window"
                   >
-                    <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Full Report Modal</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-white" />
+                    <span>View &amp; Print Report</span>
                   </button>
                 </div>
               </div>
@@ -309,14 +327,14 @@ export default function App() {
                 <div>
                   <div className="flex items-center space-x-2">
                     <h3 className="text-lg font-bold text-slate-900">
-                      Official Clinical Screening Report
+                      Cardiose Screening Summary Report
                     </h3>
                     <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
                       {resultType}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Cardiose Dual-Disease Clinical Decision Support Platform • Triangulated Risk Consensus
+                    Cardiose AI Health Screening • {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 </div>
               </div>

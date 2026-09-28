@@ -54,7 +54,7 @@ export default function HistoryView({ apiBaseUrl }) {
           <div>
             <h2 className="text-base font-bold text-slate-900">Screening Audit Log & History</h2>
             <p className="text-xs text-slate-500">
-              Audit records persisted in Supabase PostgreSQL repository
+              Every screening is automatically saved. Click any row to review it.
             </p>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function HistoryView({ apiBaseUrl }) {
           <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <h3 className="text-sm font-semibold text-slate-700">No Screening Records Found</h3>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Run a Cardiovascular or Diabetes screening from the tabs above to log clinical records into the audit trail.
+            Run a Heart or Diabetes screening from the sidebar to see records here.
           </p>
         </div>
       ) : (
@@ -116,7 +116,7 @@ export default function HistoryView({ apiBaseUrl }) {
                 <th className="px-4 py-3.5 font-bold">Date & Time</th>
                 <th className="px-4 py-3.5 font-bold">Track</th>
                 <th className="px-4 py-3.5 font-bold">Triangulated Risk</th>
-                <th className="px-4 py-3.5 font-bold">Consensus (LR / RF / NB)</th>
+                <th className="px-4 py-3.5 font-bold">Model Agreement (LR / RF / NB)</th>
                 <th className="px-4 py-3.5 font-bold">Drivers Flagged</th>
                 <th className="px-4 py-3.5 font-bold text-right">Details</th>
               </tr>

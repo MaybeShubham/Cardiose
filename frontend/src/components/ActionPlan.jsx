@@ -6,27 +6,27 @@ export default function ActionPlan({ actionPlan }) {
 
   const categories = [
     {
-      title: 'Dietary Protocol',
+      title: 'Diet',
       icon: <Apple className="w-5 h-5 text-emerald-600" />,
       content: actionPlan.dietary,
       borderColor: 'border-emerald-200 hover:border-emerald-300',
-      tag: 'Nutritional Medicine',
+      tag: 'Nutrition',
       tagColor: 'text-emerald-800 bg-emerald-50 border-emerald-200'
     },
     {
-      title: 'Lifestyle & Activity',
+      title: 'Lifestyle & Exercise',
       icon: <Dumbbell className="w-5 h-5 text-sky-600" />,
       content: actionPlan.lifestyle,
       borderColor: 'border-sky-200 hover:border-sky-300',
-      tag: 'Physical Prescriptions',
+      tag: 'Activity',
       tagColor: 'text-sky-800 bg-sky-50 border-sky-200'
     },
     {
-      title: 'Clinical Diagnostics',
+      title: 'See a Doctor',
       icon: <ClipboardList className="w-5 h-5 text-purple-600" />,
       content: actionPlan.clinical,
       borderColor: 'border-purple-200 hover:border-purple-300',
-      tag: 'Laboratory Referral',
+      tag: 'Medical Tests',
       tagColor: 'text-purple-800 bg-purple-50 border-purple-200'
     }
   ];
@@ -35,15 +35,15 @@ export default function ActionPlan({ actionPlan }) {
     <div className="p-6 rounded-2xl bg-white border border-slate-200 backdrop-blur-md shadow-md">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-800">
-          Targeted Clinical Action Plan
+          What To Do Next
         </h3>
         <span className="text-[11px] font-semibold text-teal-700">
-          Post-Diagnostic Interventions
+          Personalised Recommendations
         </span>
       </div>
 
       <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-        Rule-driven lifestyle, nutritional, and medical interventions tailored to the identified aberrant risk drivers.
+        Based on the flagged readings, here's what this patient should do next.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

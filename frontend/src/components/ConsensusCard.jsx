@@ -10,7 +10,7 @@ export default function ConsensusCard({ consensus }) {
       name: 'Logistic Regression',
       abbr: 'LR',
       prob: consensus.logistic_regression ?? 0,
-      role: 'Linear log-odds baseline and calibrated margin probability',
+      role: 'Weighs how much each reading shifts the risk — like a medical scoring checklist.',
       color: 'from-blue-500 to-indigo-600',
       badgeColor: 'text-indigo-700 bg-indigo-50 border-indigo-200'
     },
@@ -19,16 +19,16 @@ export default function ConsensusCard({ consensus }) {
       name: 'Random Forest',
       abbr: 'RF',
       prob: consensus.random_forest ?? 0,
-      role: 'Ensemble modeling non-linear biomarker interactions & splits',
+      role: 'Runs 100 decision trees and takes a majority vote — catches hidden patterns between readings.',
       color: 'from-teal-500 to-emerald-600',
       badgeColor: 'text-teal-700 bg-teal-50 border-teal-200'
     },
     {
       id: 'naive_bayes',
-      name: 'Gaussian Naive Bayes',
-      abbr: 'GNB',
+      name: 'Naive Bayes',
+      abbr: 'NB',
       prob: consensus.naive_bayes ?? 0,
-      role: 'Class-conditional feature likelihood under normal distributions',
+      role: 'Asks: how likely are these exact numbers for a healthy person vs an at-risk person?',
       color: 'from-purple-500 to-pink-600',
       badgeColor: 'text-purple-700 bg-purple-50 border-purple-200'
     }
@@ -44,7 +44,7 @@ export default function ConsensusCard({ consensus }) {
         <div className="flex items-center space-x-2">
           <GitMerge className="w-5 h-5 text-teal-600" />
           <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
-            Triangulated Algorithm Consensus
+            3-Model Agreement
           </h3>
         </div>
         <span className={`px-2 py-0.5 text-[11px] font-semibold rounded-full border ${
@@ -52,12 +52,12 @@ export default function ConsensusCard({ consensus }) {
             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
             : 'bg-amber-50 text-amber-800 border-amber-200'
         }`}>
-          {highAgreement ? 'High Consensus Convergence' : 'Cross-Model Divergence'}
+          {highAgreement ? '✓ All 3 Models Agree' : '⚠ Models Slightly Disagree'}
         </span>
       </div>
 
       <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-        Three distinct statistical learning paradigms score the patient vector concurrently to eliminate single-estimator inductive bias.
+        Three completely different algorithms checked this patient independently. When they all agree, the result is highly reliable.
       </p>
 
       {/* Model Breakdown Cards */}
@@ -75,7 +75,7 @@ export default function ConsensusCard({ consensus }) {
                 </div>
                 <div className="flex items-baseline space-x-1">
                   <span className="text-base font-bold text-slate-900">{percentage}%</span>
-                  <span className="text-[11px] text-slate-500">prob</span>
+                  <span className="text-[11px] text-slate-500">risk</span>
                 </div>
               </div>
 

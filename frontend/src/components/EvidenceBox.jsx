@@ -10,7 +10,7 @@ export default function EvidenceBox({ evidencePoints = [] }) {
         <div className="flex items-center space-x-2">
           <Stethoscope className="w-5 h-5 text-rose-500" />
           <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-800">
-            Why It Was Flagged (Clinical Biomarker Drivers)
+            Why This Risk Was Flagged
           </h3>
         </div>
         <span className="text-[11px] font-semibold text-slate-500">
@@ -19,7 +19,7 @@ export default function EvidenceBox({ evidencePoints = [] }) {
       </div>
 
       <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-        Explainable clinical heuristics mapping aberrant self-reported metrics and laboratory biometrics to established clinical thresholds.
+        Here's exactly which readings triggered the risk flag, and why they matter.
       </p>
 
       {isHealthy ? (
