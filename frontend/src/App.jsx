@@ -23,11 +23,14 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [selectedAuditItem, setSelectedAuditItem] = useState(null);
 
-  // Result state
-  const [result, setResult] = useState(null);
-  const [resultType, setResultType] = useState('Heart Disease');
+  // Independent result states for each screening track
+  const [heartResult, setHeartResult] = useState(null);
+  const [diabetesResult, setDiabetesResult] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isReportInView, setIsReportInView] = useState(false);
+
+  const activeResult = activeTab === 'heart' ? heartResult : activeTab === 'diabetes' ? diabetesResult : null;
+  const activeResultType = activeTab === 'heart' ? 'Cardiovascular Disease' : 'Diabetes Mellitus';
 
   const resultsRef = useRef(null);
 
@@ -49,7 +52,7 @@ export default function App() {
 
   // Track visibility of report section to show/hide floating button
   useEffect(() => {
-    if (!resultsRef.current || !result) {
+    if (!resultsRef.current || !activeResult) {
       setIsReportInView(false);
       return;
     }
@@ -61,7 +64,7 @@ export default function App() {
     );
     observer.observe(resultsRef.current);
     return () => observer.disconnect();
-  }, [result, activeTab]);
+  }, [activeResult, activeTab]);
 
   const scrollToReport = () => {
     if (resultsRef.current) {
@@ -91,8 +94,7 @@ export default function App() {
       }
 
       const data = await res.json();
-      setResult(data);
-      setResultType('Cardiovascular Disease');
+      setHeartResult(data);
       fetchHistory();
 
       // Explicit visual movement: Smoothly scroll down to the generated diagnostic report
@@ -128,8 +130,7 @@ export default function App() {
       }
 
       const data = await res.json();
-      setResult(data);
-      setResultType('Diabetes Mellitus');
+      setDiabetesResult(data);
       fetchHistory();
 
       // Explicit visual movement: Smoothly scroll down to the generated diagnostic report
@@ -185,9 +186,9 @@ export default function App() {
                 onSubmit={handleHeartSubmit}
                 isLoading={isLoading}
                 onShowReport={scrollToReport}
-                hasReport={result && resultType === 'Cardiovascular Disease'}
-                reportScore={result?.risk_score}
-                reportLevel={result?.risk_level}
+                hasReport={Boolean(heartResult)}
+                reportScore={heartResult?.risk_score}
+                reportLevel={heartResult?.risk_level}
               />
             </div>
           )}
@@ -199,9 +200,9 @@ export default function App() {
                 onSubmit={handleDiabetesSubmit}
                 isLoading={isLoading}
                 onShowReport={scrollToReport}
-                hasReport={result && resultType === 'Diabetes Mellitus'}
-                reportScore={result?.risk_score}
-                reportLevel={result?.risk_level}
+                hasReport={Boolean(diabetesResult)}
+                reportScore={diabetesResult?.risk_score}
+                reportLevel={diabetesResult?.risk_level}
               />
             </div>
           )}
@@ -211,32 +212,32 @@ export default function App() {
             <HistoryView apiBaseUrl={API_BASE_URL} />
           )}
 
-          {/* Screening Results Section (Displays when a screening is performed) */}
-          {result && (activeTab === 'heart' || activeTab === 'diabetes') && (
+          {/* Screening Results Section (Displays when a screening is performed for the active track) */}
+          {activeResult && (activeTab === 'heart' || activeTab === 'diabetes') && (
             <section
               ref={resultsRef}
               id="diagnostic-report-section"
               className="mt-8 pt-8 border-t border-slate-200 space-y-6 scroll-mt-6 animate-fadeIn"
             >
               <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border shadow-sm ${
-                result.risk_level === 'HIGH'
+                activeResult.risk_level === 'HIGH'
                   ? 'bg-rose-50 border-rose-200'
-                  : result.risk_level === 'MODERATE'
+                  : activeResult.risk_level === 'MODERATE'
                   ? 'bg-amber-50 border-amber-200'
                   : 'bg-emerald-50 border-emerald-200'
               }`}>
                 <div className="flex items-center space-x-3">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold shrink-0 ${
-                    result.risk_level === 'HIGH'
+                    activeResult.risk_level === 'HIGH'
                       ? 'bg-rose-100'
-                      : result.risk_level === 'MODERATE'
+                      : activeResult.risk_level === 'MODERATE'
                       ? 'bg-amber-100'
                       : 'bg-emerald-100'
                   }`}>
                     <Activity className={`w-5 h-5 ${
-                      result.risk_level === 'HIGH'
+                      activeResult.risk_level === 'HIGH'
                         ? 'text-rose-600'
-                        : result.risk_level === 'MODERATE'
+                        : activeResult.risk_level === 'MODERATE'
                         ? 'text-amber-600'
                         : 'text-emerald-600'
                     }`} />
@@ -244,10 +245,10 @@ export default function App() {
                   <div>
                     <div className="flex items-center space-x-2">
                       <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                        Screening Complete — {result.risk_level} RISK
+                        Screening Complete — {activeResult.risk_level} RISK
                       </h2>
                       <span className="text-xs font-semibold text-slate-600 bg-white/70 px-2.5 py-0.5 rounded-full border border-slate-200">
-                        {resultType}
+                        {activeResultType}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-0.5">
@@ -281,36 +282,36 @@ export default function App() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <RiskGauge
-                  score={result.risk_score}
-                  level={result.risk_level}
-                  diseaseType={resultType}
+                  score={activeResult.risk_score}
+                  level={activeResult.risk_level}
+                  diseaseType={activeResultType}
                 />
-                <ConsensusCard consensus={result.consensus} />
+                <ConsensusCard consensus={activeResult.consensus} />
               </div>
 
-              <EvidenceBox evidencePoints={result.evidence_points} />
-              <ActionPlan actionPlan={result.action_plan} />
+              <EvidenceBox evidencePoints={activeResult.evidence_points} />
+              <ActionPlan actionPlan={activeResult.action_plan} />
             </section>
           )}
         </main>
       </div>
 
       {/* Floating "Show Diagnostic Report" pill when report exists and user is scrolled away */}
-      {result && (activeTab === 'heart' || activeTab === 'diabetes') && !isReportInView && (
+      {activeResult && (activeTab === 'heart' || activeTab === 'diabetes') && !isReportInView && (
         <button
           type="button"
           onClick={scrollToReport}
           className="fixed bottom-6 right-6 z-40 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-xl hover:shadow-2xl flex items-center space-x-2.5 text-xs font-bold transition-all hover:scale-105 active:scale-95 border border-blue-400/40 animate-fadeIn no-print"
         >
           <Activity className="w-4 h-4 text-white animate-pulse" />
-          <span>Show Diagnostic Report ({result.risk_score}/100)</span>
+          <span>Show Diagnostic Report ({activeResult.risk_score}/100)</span>
           <ArrowDown className="w-4 h-4 animate-bounce" />
         </button>
       )}
       </div>
 
       {/* Dedicated Full Diagnostic Report Modal (Rendered outside main-app-shell for clean 1-page printing) */}
-      {isReportModalOpen && result && (
+      {isReportModalOpen && activeResult && (
         <div
           id="printable-report-modal"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn"
@@ -330,7 +331,7 @@ export default function App() {
                       Cardiose Screening Summary Report
                     </h3>
                     <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
-                      {resultType}
+                      {activeResultType}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -360,18 +361,18 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print-avoid-break">
               <RiskGauge
-                score={result.risk_score}
-                level={result.risk_level}
-                diseaseType={resultType}
+                score={activeResult.risk_score}
+                level={activeResult.risk_level}
+                diseaseType={activeResultType}
               />
-              <ConsensusCard consensus={result.consensus} />
+              <ConsensusCard consensus={activeResult.consensus} />
             </div>
 
             <div className="print-avoid-break">
-              <EvidenceBox evidencePoints={result.evidence_points} />
+              <EvidenceBox evidencePoints={activeResult.evidence_points} />
             </div>
             <div className="print-avoid-break">
-              <ActionPlan actionPlan={result.action_plan} />
+              <ActionPlan actionPlan={activeResult.action_plan} />
             </div>
           </div>
         </div>
