@@ -186,6 +186,7 @@ export default function App() {
                 onSubmit={handleHeartSubmit}
                 isLoading={isLoading}
                 onShowReport={scrollToReport}
+                onValuesChange={() => setHeartResult(null)}
                 hasReport={Boolean(heartResult)}
                 reportScore={heartResult?.risk_score}
                 reportLevel={heartResult?.risk_level}
@@ -200,6 +201,7 @@ export default function App() {
                 onSubmit={handleDiabetesSubmit}
                 isLoading={isLoading}
                 onShowReport={scrollToReport}
+                onValuesChange={() => setDiabetesResult(null)}
                 hasReport={Boolean(diabetesResult)}
                 reportScore={diabetesResult?.risk_score}
                 reportLevel={diabetesResult?.risk_level}

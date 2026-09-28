@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Droplets, Dices, Info, CheckCircle2, FileText, ArrowDown } from 'lucide-react';
 import { COHORT_ARCHETYPES, generateRandomCorrelatedPatient } from '../utils/patientGenerator';
 
-export default function DiabetesForm({ onSubmit, isLoading, onShowReport, hasReport, reportScore, reportLevel }) {
+export default function DiabetesForm({ onSubmit, isLoading, onShowReport, hasReport, reportScore, reportLevel, onValuesChange }) {
   const [formData, setFormData] = useState(COHORT_ARCHETYPES[3].diabetes); // Middle-Aged Male 52y default
   const [activePersona, setActivePersona] = useState(COHORT_ARCHETYPES[3].label);
   const [activePersonaDesc, setActivePersonaDesc] = useState(COHORT_ARCHETYPES[3].description);
@@ -15,12 +15,14 @@ export default function DiabetesForm({ onSubmit, isLoading, onShowReport, hasRep
     }));
     setActivePersona('Custom Biometrics');
     setActivePersonaDesc('User-modified clinical values');
+    onValuesChange?.();
   };
 
   const handleSelectArchetype = (archetype) => {
     setFormData(archetype.diabetes);
     setActivePersona(archetype.label);
     setActivePersonaDesc(archetype.description);
+    onValuesChange?.();
   };
 
   const handleRandomPatient = () => {
@@ -28,6 +30,7 @@ export default function DiabetesForm({ onSubmit, isLoading, onShowReport, hasRep
     setFormData(randomCase.diabetes);
     setActivePersona(randomCase.label);
     setActivePersonaDesc(`Correlated random generation: BMI (${randomCase.diabetes.bmi}) & Insulin (${randomCase.diabetes.insulin} mu U/ml) coupled to age ${randomCase.diabetes.age}y and biological sex.`);
+    onValuesChange?.();
   };
 
   const handleSubmit = (e) => {

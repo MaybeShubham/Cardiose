@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Heart, Dices, Info, CheckCircle2, FileText, ArrowDown } from 'lucide-react';
 import { COHORT_ARCHETYPES, generateRandomCorrelatedPatient } from '../utils/patientGenerator';
 
-export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport, reportScore, reportLevel }) {
+export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport, reportScore, reportLevel, onValuesChange }) {
   const [formData, setFormData] = useState(COHORT_ARCHETYPES[3].heart); // Middle-Aged Male 52y default
   const [activePersona, setActivePersona] = useState(COHORT_ARCHETYPES[3].label);
   const [activePersonaDesc, setActivePersonaDesc] = useState(COHORT_ARCHETYPES[3].description);
@@ -15,12 +15,14 @@ export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport
     }));
     setActivePersona('Custom Biometrics');
     setActivePersonaDesc('User-modified clinical values');
+    onValuesChange?.();
   };
 
   const handleSelectArchetype = (archetype) => {
     setFormData(archetype.heart);
     setActivePersona(archetype.label);
     setActivePersonaDesc(archetype.description);
+    onValuesChange?.();
   };
 
   const handleRandomPatient = () => {
@@ -28,6 +30,7 @@ export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport
     setFormData(randomCase.heart);
     setActivePersona(randomCase.label);
     setActivePersonaDesc(`Correlated random generation: BP & peak HR (${randomCase.heart.thalach} bpm) scaled to age ${randomCase.heart.age}y and biological sex.`);
+    onValuesChange?.();
   };
 
   const handleSubmit = (e) => {
