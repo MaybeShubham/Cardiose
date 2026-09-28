@@ -619,26 +619,25 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200/80 bg-white/70 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <footer className="border-t border-slate-200/80 bg-white/70 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center">
               <img src="/logo.png" alt="Cardiose Logo" className="w-full h-full object-contain" />
             </div>
             <div>
-              <span className="text-lg font-extrabold text-slate-900">Cardiose</span>
+              <span className="text-base font-extrabold text-slate-900">Cardiose</span>
               <p className="text-xs text-slate-500">Explainable Dual-Disease Risk Screening Platform</p>
             </div>
           </div>
 
-          <div className="text-center md:text-right text-xs text-slate-500 max-w-lg">
-            <p>
-              <strong>Disclaimer:</strong> Cardiose is an investigational clinical decision support system designed for research and educational purposes. Not intended as a standalone diagnostic substitute for medical examination.
-            </p>
-            <p className="mt-1">
-              &copy; {new Date().getFullYear()} Cardiose Project. All rights reserved.
-            </p>
-          </div>
+          <button
+            onClick={onEnterWorkspace}
+            className="bg-[#0c0d12] hover:bg-black text-white px-5 py-2 rounded-full text-xs font-bold transition shadow-xs flex items-center space-x-1.5"
+          >
+            <span>Launch Platform</span>
+            <ArrowRight className="w-3.5 h-3.5 text-white/90" />
+          </button>
         </div>
       </footer>
     </div>
