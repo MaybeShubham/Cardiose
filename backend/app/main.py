@@ -5,6 +5,7 @@ Exposes clinical prediction endpoints, health checks, and historical audit logs.
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 import time
 import os
 
@@ -33,6 +34,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# GZip compression for payloads > 500 bytes (saves bandwidth on Render free tier)
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # Enable CORS for decoupled React frontend (supports custom deployed origin or open access)
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")

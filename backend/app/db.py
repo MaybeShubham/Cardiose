@@ -3,6 +3,7 @@ Provides Supabase PostgreSQL persistence for screening audit logs
 with robust in-memory fallback for local development or offline viva demonstrations.
 """
 
+import asyncio
 import os
 import uuid
 from datetime import datetime, timezone
@@ -53,7 +54,9 @@ async def log_screening(
 
     if _supabase_client:
         try:
-            response = _supabase_client.table("cardiose_screening_history").insert(record).execute()
+            response = await asyncio.to_thread(
+                lambda: _supabase_client.table("cardiose_screening_history").insert(record).execute()
+            )
             if response.data:
                 return response.data[0]
         except Exception as e:
@@ -66,12 +69,14 @@ async def get_history(limit: int = 50) -> List[Dict[str, Any]]:
     """Retrieve historical screenings sorted newest first."""
     if _supabase_client:
         try:
-            response = (
-                _supabase_client.table("cardiose_screening_history")
-                .select("*")
-                .order("created_at", desc=True)
-                .limit(limit)
-                .execute()
+            response = await asyncio.to_thread(
+                lambda: (
+                    _supabase_client.table("cardiose_screening_history")
+                    .select("*")
+                    .order("created_at", desc=True)
+                    .limit(limit)
+                    .execute()
+                )
             )
             if response.data is not None:
                 return response.data
@@ -86,7 +91,9 @@ async def delete_screening(record_id: str) -> bool:
     _IN_MEMORY_HISTORY = [r for r in _IN_MEMORY_HISTORY if r.get("id") != record_id]
     if _supabase_client:
         try:
-            _supabase_client.table("cardiose_screening_history").delete().eq("id", record_id).execute()
+            await asyncio.to_thread(
+                lambda: _supabase_client.table("cardiose_screening_history").delete().eq("id", record_id).execute()
+            )
             return True
         except Exception as e:
             print(f"⚠ Supabase delete failed: {e}")
@@ -99,7 +106,9 @@ async def clear_all_history() -> bool:
     if _supabase_client:
         try:
             # Delete all rows where risk_score is greater than or equal to 0
-            _supabase_client.table("cardiose_screening_history").delete().gte("risk_score", 0).execute()
+            await asyncio.to_thread(
+                lambda: _supabase_client.table("cardiose_screening_history").delete().gte("risk_score", 0).execute()
+            )
             return True
         except Exception as e:
             print(f"⚠ Supabase clear all failed: {e}")
