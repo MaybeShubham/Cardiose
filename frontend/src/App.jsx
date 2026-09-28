@@ -10,6 +10,7 @@ import ActionPlan from './components/ActionPlan';
 import HistoryView from './components/HistoryView';
 import ColdStartBanner from './components/ColdStartBanner';
 import { Activity, AlertCircle, ArrowDown, ArrowUp, ExternalLink, Printer, FileText } from 'lucide-react';
+import { COHORT_ARCHETYPES, generateRandomCorrelatedPatient } from './utils/patientGenerator';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -22,6 +23,12 @@ export default function App() {
   // History state for dashboard metrics
   const [history, setHistory] = useState([]);
   const [selectedAuditItem, setSelectedAuditItem] = useState(null);
+
+  // Shared active patient profile across both Heart and Diabetes screenings
+  const [activePersona, setActivePersona] = useState(COHORT_ARCHETYPES[3].label);
+  const [activePersonaDesc, setActivePersonaDesc] = useState(COHORT_ARCHETYPES[3].description);
+  const [heartFormData, setHeartFormData] = useState(COHORT_ARCHETYPES[3].heart);
+  const [diabetesFormData, setDiabetesFormData] = useState(COHORT_ARCHETYPES[3].diabetes);
 
   // Independent result states for each screening track
   const [heartResult, setHeartResult] = useState(null);
@@ -70,6 +77,47 @@ export default function App() {
     if (resultsRef.current) {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+
+  const handleSelectArchetype = (archetype) => {
+    setActivePersona(archetype.label);
+    setActivePersonaDesc(archetype.description);
+    setHeartFormData(archetype.heart);
+    setDiabetesFormData(archetype.diabetes);
+    setHeartResult(null);
+    setDiabetesResult(null);
+  };
+
+  const handleRandomPatient = () => {
+    const randomCase = generateRandomCorrelatedPatient();
+    setActivePersona(randomCase.label);
+    setActivePersonaDesc(`Correlated random generation: BP (${randomCase.heart.trestbps} mm Hg), peak HR (${randomCase.heart.thalach} bpm), BMI (${randomCase.diabetes.bmi}), and Glucose (${randomCase.diabetes.glucose} mg/dL) coupled to age ${randomCase.heart.age}y and biological sex.`);
+    setHeartFormData(randomCase.heart);
+    setDiabetesFormData(randomCase.diabetes);
+    setHeartResult(null);
+    setDiabetesResult(null);
+  };
+
+  const handleHeartFieldChange = (name, value) => {
+    setHeartFormData(prev => ({ ...prev, [name]: value }));
+    // Synchronize common biometric fields (age, sex) across both panels automatically
+    if (name === 'age') {
+      setDiabetesFormData(prev => ({ ...prev, age: value }));
+    }
+    setActivePersona('Custom Biometrics');
+    setActivePersonaDesc('User-modified clinical values');
+    setHeartResult(null);
+  };
+
+  const handleDiabetesFieldChange = (name, value) => {
+    setDiabetesFormData(prev => ({ ...prev, [name]: value }));
+    // Synchronize common biometric fields (age) across both panels automatically
+    if (name === 'age') {
+      setHeartFormData(prev => ({ ...prev, age: value }));
+    }
+    setActivePersona('Custom Biometrics');
+    setActivePersonaDesc('User-modified clinical values');
+    setDiabetesResult(null);
   };
 
   const scrollToTop = () => {
@@ -183,10 +231,15 @@ export default function App() {
           {activeTab === 'heart' && (
             <div className="space-y-6">
               <HeartForm
+                formData={heartFormData}
+                activePersona={activePersona}
+                activePersonaDesc={activePersonaDesc}
+                onChange={handleHeartFieldChange}
+                onSelectArchetype={handleSelectArchetype}
+                onRandomPatient={handleRandomPatient}
                 onSubmit={handleHeartSubmit}
                 isLoading={isLoading}
                 onShowReport={scrollToReport}
-                onValuesChange={() => setHeartResult(null)}
                 hasReport={Boolean(heartResult)}
                 reportScore={heartResult?.risk_score}
                 reportLevel={heartResult?.risk_level}
@@ -198,10 +251,15 @@ export default function App() {
           {activeTab === 'diabetes' && (
             <div className="space-y-6">
               <DiabetesForm
+                formData={diabetesFormData}
+                activePersona={activePersona}
+                activePersonaDesc={activePersonaDesc}
+                onChange={handleDiabetesFieldChange}
+                onSelectArchetype={handleSelectArchetype}
+                onRandomPatient={handleRandomPatient}
                 onSubmit={handleDiabetesSubmit}
                 isLoading={isLoading}
                 onShowReport={scrollToReport}
-                onValuesChange={() => setDiabetesResult(null)}
                 hasReport={Boolean(diabetesResult)}
                 reportScore={diabetesResult?.risk_score}
                 reportLevel={diabetesResult?.risk_level}

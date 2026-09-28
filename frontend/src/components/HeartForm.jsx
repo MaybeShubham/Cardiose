@@ -2,35 +2,24 @@ import React, { useState } from 'react';
 import { Heart, Dices, Info, CheckCircle2, FileText, ArrowDown } from 'lucide-react';
 import { COHORT_ARCHETYPES, generateRandomCorrelatedPatient } from '../utils/patientGenerator';
 
-export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport, reportScore, reportLevel, onValuesChange }) {
-  const [formData, setFormData] = useState(COHORT_ARCHETYPES[3].heart); // Middle-Aged Male 52y default
-  const [activePersona, setActivePersona] = useState(COHORT_ARCHETYPES[3].label);
-  const [activePersonaDesc, setActivePersonaDesc] = useState(COHORT_ARCHETYPES[3].description);
-
+export default function HeartForm({
+  formData,
+  activePersona,
+  activePersonaDesc,
+  onChange,
+  onSelectArchetype,
+  onRandomPatient,
+  onSubmit,
+  isLoading,
+  onShowReport,
+  hasReport,
+  reportScore,
+  reportLevel
+}) {
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? (value === '' ? '' : parseFloat(value)) : parseInt(value, 10)
-    }));
-    setActivePersona('Custom Biometrics');
-    setActivePersonaDesc('User-modified clinical values');
-    onValuesChange?.();
-  };
-
-  const handleSelectArchetype = (archetype) => {
-    setFormData(archetype.heart);
-    setActivePersona(archetype.label);
-    setActivePersonaDesc(archetype.description);
-    onValuesChange?.();
-  };
-
-  const handleRandomPatient = () => {
-    const randomCase = generateRandomCorrelatedPatient('heart');
-    setFormData(randomCase.heart);
-    setActivePersona(randomCase.label);
-    setActivePersonaDesc(`Correlated random generation: BP & peak HR (${randomCase.heart.thalach} bpm) scaled to age ${randomCase.heart.age}y and biological sex.`);
-    onValuesChange?.();
+    const parsed = type === 'number' ? (value === '' ? '' : parseFloat(value)) : parseInt(value, 10);
+    onChange(name, parsed);
   };
 
   const handleSubmit = (e) => {
@@ -60,7 +49,7 @@ export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport
                 aria-label="Select Cohort Archetype"
                 onChange={(e) => {
                   const idx = parseInt(e.target.value, 10);
-                  if (!isNaN(idx)) handleSelectArchetype(COHORT_ARCHETYPES[idx]);
+                  if (!isNaN(idx)) onSelectArchetype(COHORT_ARCHETYPES[idx]);
                 }}
                 value={COHORT_ARCHETYPES.findIndex(a => a.label === activePersona) !== -1 ? COHORT_ARCHETYPES.findIndex(a => a.label === activePersona) : ''}
                 className="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
@@ -77,7 +66,7 @@ export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport
             {/* Random Correlated Generator Button */}
             <button
               type="button"
-              onClick={handleRandomPatient}
+              onClick={onRandomPatient}
               className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-all flex items-center space-x-1.5 shadow-xs"
               title="Draw a realistic patient with biometrics physiologically correlated to age & sex"
             >
