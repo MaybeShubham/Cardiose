@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, AlertOctagon, HeartPulse } from 'lucide-react';
 
 export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Heart Disease' }) {
-  const targetScore = Math.max(0, Math.min(100, Number(score) || 0));
-  const [animatedScore, setAnimatedScore] = useState(0);
+  const targetScore = Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
+  const [animatedScore, setAnimatedScore] = useState(targetScore);
 
   useEffect(() => {
     let startTimestamp = null;
@@ -12,7 +12,7 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
     if (diff === 0) return;
 
     let frameId;
-    const duration = 850;
+    const duration = 650;
     const step = (timestamp) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
@@ -26,9 +26,10 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
     return () => cancelAnimationFrame(frameId);
   }, [targetScore]);
 
+  const displayScore = Number.isFinite(animatedScore) ? animatedScore : targetScore;
   const radius = 80;
   const halfCircumference = Math.PI * radius;
-  const strokeDashoffset = halfCircumference - (animatedScore / 100) * halfCircumference;
+  const strokeDashoffset = halfCircumference - (displayScore / 100) * halfCircumference;
 
   const getTheme = () => {
     switch (level) {
@@ -120,7 +121,7 @@ export default function RiskGauge({ score = 0, level = 'LOW', diseaseType = 'Hea
         <div className="absolute bottom-1 flex flex-col items-center">
           <div className="flex items-baseline">
             <span className={`text-4xl sm:text-5xl font-extrabold tracking-tight ${theme.textColor}`}>
-              {normalizedScore}
+              {displayScore}
             </span>
             <span className="text-slate-400 text-sm font-medium ml-1">/ 100</span>
           </div>

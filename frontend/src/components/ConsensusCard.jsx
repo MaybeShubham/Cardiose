@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { GitMerge } from 'lucide-react';
 
 function ModelRow({ model, delay = 0 }) {
-  const targetPct = Math.round(model.prob * 100);
-  const [animatedPct, setAnimatedPct] = useState(0);
-  const [barWidth, setBarWidth] = useState(0);
+  const targetPct = Math.max(0, Math.min(100, Math.round((Number(model?.prob) || 0) * 100)));
+  const [animatedPct, setAnimatedPct] = useState(targetPct);
+  const [barWidth, setBarWidth] = useState(targetPct);
 
   useEffect(() => {
     setBarWidth(0);
     const timer = setTimeout(() => {
       setBarWidth(targetPct);
-    }, 60 + delay);
+    }, 40 + delay);
 
     let startTimestamp = null;
     const startVal = animatedPct;
@@ -18,7 +18,7 @@ function ModelRow({ model, delay = 0 }) {
     if (diff === 0) return () => clearTimeout(timer);
 
     let frameId;
-    const duration = 850;
+    const duration = 650;
     const step = (timestamp) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
