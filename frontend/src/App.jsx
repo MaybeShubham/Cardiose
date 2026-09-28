@@ -22,7 +22,6 @@ export default function App() {
 
   // History state for dashboard metrics
   const [history, setHistory] = useState([]);
-  const [selectedAuditItem, setSelectedAuditItem] = useState(null);
 
   // Shared active patient profile across both Heart and Diabetes screenings
   const [activePersona, setActivePersona] = useState(COHORT_ARCHETYPES[3].label);
@@ -434,69 +433,6 @@ export default function App() {
             <div className="print-avoid-break">
               <ActionPlan actionPlan={activeResult.action_plan} />
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Detail Inspection Modal for Dashboard Flags */}
-      {selectedAuditItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="max-w-2xl w-full bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div className="flex items-center space-x-2">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
-                  selectedAuditItem.risk_level === 'HIGH'
-                    ? 'bg-rose-100 text-rose-800 border-rose-200'
-                    : 'bg-amber-100 text-amber-800 border-amber-200'
-                }`}>
-                  {selectedAuditItem.risk_level} ({selectedAuditItem.risk_score}/100)
-                </span>
-                <span className="text-sm font-bold text-slate-900">
-                  {selectedAuditItem.disease_type} Screening Audit
-                </span>
-              </div>
-              <button
-                onClick={() => setSelectedAuditItem(null)}
-                className="text-slate-500 hover:text-slate-900 text-sm px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
-              >
-                ✕ Close
-              </button>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                Biomarker Evidence:
-              </h4>
-              <ul className="space-y-1.5">
-                {selectedAuditItem.evidence_points?.map((pt, i) => (
-                  <li key={i} className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                    • {pt}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {selectedAuditItem.action_plan && (
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Action Plan:
-                </h4>
-                <div className="space-y-2 text-xs">
-                  <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-100">
-                    <span className="text-emerald-800 font-bold block mb-0.5">Dietary:</span>
-                    <span className="text-slate-700">{selectedAuditItem.action_plan.dietary}</span>
-                  </div>
-                  <div className="p-2.5 bg-sky-50 rounded-lg border border-sky-100">
-                    <span className="text-sky-800 font-bold block mb-0.5">Lifestyle:</span>
-                    <span className="text-slate-700">{selectedAuditItem.action_plan.lifestyle}</span>
-                  </div>
-                  <div className="p-2.5 bg-purple-50 rounded-lg border border-purple-100">
-                    <span className="text-purple-800 font-bold block mb-0.5">Clinical:</span>
-                    <span className="text-slate-700">{selectedAuditItem.action_plan.clinical}</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

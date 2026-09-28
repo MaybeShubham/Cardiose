@@ -232,15 +232,6 @@ export default function HistoryView({ apiBaseUrl }) {
                 </div>
               </div>
             )}
-
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                Submitted Raw Inputs:
-              </h4>
-              <pre className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[11px] font-mono text-slate-700 overflow-x-auto">
-                {JSON.stringify(selectedItem.user_inputs, null, 2)}
-              </pre>
-            </div>
           </div>
         </div>
       )}
