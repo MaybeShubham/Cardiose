@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import LandingPage from './components/LandingPage';
 import Sidebar from './components/Sidebar';
 import TopHeader from './components/TopHeader';
 import HeartForm from './components/HeartForm';
@@ -15,6 +16,7 @@ import { COHORT_ARCHETYPES, generateRandomCorrelatedPatient } from './utils/pati
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function App() {
+  const [currentView, setCurrentView] = useState('landing');
   const [activeTab, setActiveTab] = useState('heart');
   const [isLoading, setIsLoading] = useState(false);
   const [coldStartNotice, setColdStartNotice] = useState(false);
@@ -195,18 +197,45 @@ export default function App() {
     }
   };
 
+  if (currentView === 'landing') {
+    return (
+      <LandingPage
+        onEnterWorkspace={() => {
+          setCurrentView('workspace');
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+        onSelectArchetypeAndEnter={(arch) => {
+          handleSelectArchetype(arch);
+          setCurrentView('workspace');
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+      />
+    );
+  }
+
   return (
     <>
       {/* Main Application Shell (hidden during report printing) */}
       <div id="main-app-shell" className="min-h-screen flex bg-[#f6f8fd] text-slate-800">
-        {/* Left Navigation Sidebar (MindCare Style) */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        {/* Left Navigation Sidebar */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onBackToLanding={() => {
+            setCurrentView('landing');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
+        />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <TopHeader
           activeTab={activeTab}
           onNewScreening={(track) => setActiveTab(track)}
+          onBackToLanding={() => {
+            setCurrentView('landing');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}
         />
 
         <main className="flex-1 p-8 max-w-7xl w-full mx-auto space-y-6">
