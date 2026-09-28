@@ -317,16 +317,8 @@ export default function App() {
                 reportLevel={heartResult?.risk_level}
               />
 
-              {/* Step Navigation Bar: Heart -> Diabetes */}
-              <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
-                <button
-                  type="button"
-                  onClick={() => navigateTo('landing')}
-                  className="flex items-center space-x-2 text-xs font-semibold text-slate-600 hover:text-slate-950 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition shadow-2xs"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Project Overview</span>
-                </button>
+              {/* Step Navigation Bar: Proceed to Diabetes */}
+              <div className="flex items-center justify-end p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
                 <button
                   type="button"
                   onClick={() => navigateTo('workspace', 'diabetes')}
