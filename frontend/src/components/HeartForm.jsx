@@ -93,32 +93,6 @@ export default function HeartForm({ onSubmit, isLoading, onShowReport, hasReport
             <span className="text-slate-500 ml-1.5">— {activePersonaDesc}</span>
           </div>
         </div>
-
-        {/* Quick Demo Presets */}
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">Quick Demo:</span>
-          <button
-            type="button"
-            onClick={() => handleSelectArchetype(COHORT_ARCHETYPES[1])}
-            className="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-all flex items-center space-x-1.5 shadow-xs"
-          >
-            🟢 Healthy Young
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSelectArchetype(COHORT_ARCHETYPES[3])}
-            className="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-all flex items-center space-x-1.5 shadow-xs"
-          >
-            🟡 Borderline Risk
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSelectArchetype(COHORT_ARCHETYPES[5])}
-            className="px-3 py-1.5 text-xs font-bold rounded-xl bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-all flex items-center space-x-1.5 shadow-xs"
-          >
-            🔴 High Risk Senior
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
