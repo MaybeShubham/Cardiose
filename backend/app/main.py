@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 import time
+import os
 
 from app.schemas import (
     HeartScreeningInput,
@@ -33,11 +34,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Enable CORS for decoupled React frontend
+# Enable CORS for decoupled React frontend (supports custom deployed origin or open access)
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")
+allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()] if allowed_origins_env != "*" else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
