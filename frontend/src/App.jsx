@@ -10,17 +10,71 @@ import EvidenceBox from './components/EvidenceBox';
 import ActionPlan from './components/ActionPlan';
 import HistoryView from './components/HistoryView';
 import ColdStartBanner from './components/ColdStartBanner';
-import { Activity, AlertCircle, ArrowDown, ArrowUp, ExternalLink, Printer, FileText } from 'lucide-react';
+import { Activity, AlertCircle, ArrowDown, ArrowUp, ExternalLink, Printer, FileText, ArrowLeft, ArrowRight } from 'lucide-react';
 import { COHORT_ARCHETYPES, generateRandomCorrelatedPatient } from './utils/patientGenerator';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+function getRouteFromLocation() {
+  const hash = window.location.hash || '';
+  if (hash.startsWith('#/workspace')) {
+    const parts = hash.split('/');
+    const tab = parts[2] || 'heart';
+    return {
+      view: 'workspace',
+      tab: ['heart', 'diabetes', 'history'].includes(tab) ? tab : 'heart'
+    };
+  }
+  return { view: 'landing', tab: 'heart' };
+}
+
 export default function App() {
-  const [currentView, setCurrentView] = useState('landing');
-  const [activeTab, setActiveTab] = useState('heart');
+  const initialRoute = getRouteFromLocation();
+  const [currentView, setCurrentView] = useState(initialRoute.view);
+  const [activeTab, setActiveTab] = useState(initialRoute.tab);
   const [isLoading, setIsLoading] = useState(false);
   const [coldStartNotice, setColdStartNotice] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+
+  // Sync state with browser URL & history stack
+  const navigateTo = (view, tab = null, options = { push: true }) => {
+    const nextTab = tab || (view === 'workspace' ? activeTab || 'heart' : 'heart');
+    setCurrentView(view);
+    if (view === 'workspace') {
+      setActiveTab(nextTab);
+    }
+
+    const targetHash = view === 'landing' ? '#/' : `#/workspace/${nextTab}`;
+    if (window.location.hash !== targetHash) {
+      if (options.push) {
+        window.history.pushState({ view, tab: nextTab }, '', targetHash);
+      } else {
+        window.history.replaceState({ view, tab: nextTab }, '', targetHash);
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = getRouteFromLocation();
+      setCurrentView(route.view);
+      setActiveTab(route.tab);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+
+    // Normalize initial root hash
+    if (!window.location.hash) {
+      window.history.replaceState({ view: 'landing', tab: 'heart' }, '', '#/');
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
+  }, []);
 
   // History state for dashboard metrics
   const [history, setHistory] = useState([]);
@@ -200,14 +254,10 @@ export default function App() {
   if (currentView === 'landing') {
     return (
       <LandingPage
-        onEnterWorkspace={() => {
-          setCurrentView('workspace');
-          window.scrollTo({ top: 0, behavior: 'instant' });
-        }}
+        onEnterWorkspace={() => navigateTo('workspace', 'heart')}
         onSelectArchetypeAndEnter={(arch) => {
           handleSelectArchetype(arch);
-          setCurrentView('workspace');
-          window.scrollTo({ top: 0, behavior: 'instant' });
+          navigateTo('workspace', 'heart');
         }}
       />
     );
@@ -220,22 +270,16 @@ export default function App() {
         {/* Left Navigation Sidebar */}
         <Sidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onBackToLanding={() => {
-            setCurrentView('landing');
-            window.scrollTo({ top: 0, behavior: 'instant' });
-          }}
+          setActiveTab={(tab) => navigateTo('workspace', tab)}
+          onBackToLanding={() => navigateTo('landing')}
         />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <TopHeader
           activeTab={activeTab}
-          onNewScreening={(track) => setActiveTab(track)}
-          onBackToLanding={() => {
-            setCurrentView('landing');
-            window.scrollTo({ top: 0, behavior: 'instant' });
-          }}
+          onNewScreening={(track) => navigateTo('workspace', track)}
+          onBackToLanding={() => navigateTo('landing')}
         />
 
         <main className="flex-1 p-8 max-w-7xl w-full mx-auto space-y-6">
@@ -272,6 +316,26 @@ export default function App() {
                 reportScore={heartResult?.risk_score}
                 reportLevel={heartResult?.risk_level}
               />
+
+              {/* Step Navigation Bar: Heart -> Diabetes */}
+              <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('landing')}
+                  className="flex items-center space-x-2 text-xs font-semibold text-slate-600 hover:text-slate-950 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition shadow-2xs"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Project Overview</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('workspace', 'diabetes')}
+                  className="flex items-center space-x-2 text-xs font-bold text-white px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+                >
+                  <span>Next: Diabetes Screening</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
 
@@ -292,12 +356,54 @@ export default function App() {
                 reportScore={diabetesResult?.risk_score}
                 reportLevel={diabetesResult?.risk_level}
               />
+
+              {/* Step Navigation Bar: Heart <-> History */}
+              <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('workspace', 'heart')}
+                  className="flex items-center space-x-2 text-xs font-semibold text-slate-600 hover:text-slate-950 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition shadow-2xs"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Previous: Heart Screening</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('workspace', 'history')}
+                  className="flex items-center space-x-2 text-xs font-bold text-white px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+                >
+                  <span>Next: Screening History</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
 
           {/* Tab 4: Audit History */}
           {activeTab === 'history' && (
-            <HistoryView apiBaseUrl={API_BASE_URL} />
+            <div className="space-y-6">
+              <HistoryView apiBaseUrl={API_BASE_URL} />
+
+              {/* Step Navigation Bar: Diabetes <-> Heart */}
+              <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('workspace', 'diabetes')}
+                  className="flex items-center space-x-2 text-xs font-semibold text-slate-600 hover:text-slate-950 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition shadow-2xs"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Previous: Diabetes Screening</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('workspace', 'heart')}
+                  className="flex items-center space-x-2 text-xs font-bold text-slate-900 hover:text-blue-600 px-4 py-2 rounded-xl bg-slate-100 hover:bg-blue-50 transition border border-slate-200/60"
+                >
+                  <span>Return to Heart Screening</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           )}
 
           {/* Screening Results Section (Displays when a screening is performed for the active track) */}

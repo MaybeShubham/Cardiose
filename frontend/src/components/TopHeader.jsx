@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Droplets, ArrowLeft } from 'lucide-react';
+import { Heart, Droplets, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function TopHeader({ activeTab, onNewScreening, onBackToLanding }) {
   const getTitle = () => {
@@ -17,11 +17,34 @@ export default function TopHeader({ activeTab, onNewScreening, onBackToLanding }
 
   return (
     <header className="h-16 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md bg-white/90">
-      {/* Current Page Title */}
-      <div>
-        <h2 className="text-base font-bold text-slate-800">
-          {getTitle()}
-        </h2>
+      {/* Navigation History Controls & Current Page Title */}
+      <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-1 border border-slate-200 rounded-xl p-0.5 bg-slate-50 shadow-xs">
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-950 hover:bg-white transition shadow-2xs"
+            title="Go Back"
+            aria-label="Go Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => window.history.forward()}
+            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-950 hover:bg-white transition shadow-2xs"
+            title="Go Forward"
+            aria-label="Go Forward"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div>
+          <h2 className="text-base font-bold text-slate-800">
+            {getTitle()}
+          </h2>
+        </div>
       </div>
 
       {/* Right Controls: Quick Screening Launch Buttons */}
