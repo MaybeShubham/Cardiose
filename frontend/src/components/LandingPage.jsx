@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Heart,
   Droplets,
@@ -20,8 +20,95 @@ import {
 } from 'lucide-react';
 import { COHORT_ARCHETYPES } from '../utils/patientGenerator';
 
+const NAV_ITEMS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'solution', label: 'Dual-Disease AI' },
+  { id: 'triangulation', label: 'Triangulation' },
+  { id: 'archetypes', label: 'Archetypes' },
+  { id: 'evidence', label: 'Clinical Guidelines' }
+];
+
 export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnter }) {
   const [activeTabNav, setActiveTabNav] = useState('overview');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
+
+  const navBtnRefs = useRef({});
+  const navContainerRef = useRef(null);
+
+  // Smoothly update the sliding indicator pill position
+  const updateIndicator = (tabId = activeTabNav) => {
+    const activeBtn = navBtnRefs.current[tabId];
+    const container = navContainerRef.current;
+    if (activeBtn && container) {
+      const btnRect = activeBtn.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      setIndicatorStyle({
+        left: btnRect.left - containerRect.left,
+        width: btnRect.width,
+        opacity: 1
+      });
+    }
+  };
+
+  useEffect(() => {
+    updateIndicator(activeTabNav);
+  }, [activeTabNav]);
+
+  useEffect(() => {
+    const handleResize = () => updateIndicator(activeTabNav);
+    window.addEventListener('resize', handleResize);
+    // Initial calculation after render
+    const timer = setTimeout(() => updateIndicator('overview'), 100);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  // Scroll listener for:
+  // 1) Navbar background elevation (isScrolled)
+  // 2) Scroll spy to dynamically switch active nav item as user scrolls
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 25);
+
+      const scrollPosition = window.scrollY + 200;
+      for (let i = NAV_ITEMS.length - 1; i >= 0; i--) {
+        const sectionId = NAV_ITEMS[i].id;
+        const el = document.getElementById(sectionId);
+        if (el) {
+          if (scrollPosition >= el.offsetTop) {
+            setActiveTabNav(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // IntersectionObserver for scroll-reveal animations across cards and sections
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const elements = document.querySelectorAll('.reveal-on-scroll');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   const scrollToSection = (id) => {
     setActiveTabNav(id);
@@ -33,8 +120,14 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#cae4fc] via-[#e8f2fc] via-40% to-[#faf9f5] text-slate-900 font-sans selection:bg-[#fef08a] selection:text-slate-900">
-      {/* Top Floating Navigation Bar */}
-      <header className="fixed top-0 inset-x-0 z-50 px-4 sm:px-6 lg:px-8 pt-4 pb-3">
+      {/* Top Floating Navigation Bar with Dynamic Scroll Styles */}
+      <header
+        className={`fixed top-0 inset-x-0 z-50 px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+          isScrolled
+            ? 'py-2.5 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-xs'
+            : 'pt-4 pb-3 bg-transparent'
+        }`}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Brand Logo & Wordmark */}
           <div 
@@ -54,48 +147,38 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
             </div>
           </div>
 
-          {/* Floating Pill Center Menu */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-2 bg-white/70 backdrop-blur-md border border-white/80 shadow-xs px-4 py-1.5 rounded-full text-xs font-semibold text-slate-700">
-            <button
-              onClick={() => scrollToSection('overview')}
-              className={`px-3 py-1.5 rounded-full transition-colors ${
-                activeTabNav === 'overview' ? 'bg-white shadow-xs text-slate-950 font-bold' : 'hover:text-slate-950 hover:bg-white/50'
-              }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => scrollToSection('solution')}
-              className={`px-3 py-1.5 rounded-full transition-colors ${
-                activeTabNav === 'solution' ? 'bg-white shadow-xs text-slate-950 font-bold' : 'hover:text-slate-950 hover:bg-white/50'
-              }`}
-            >
-              Dual-Disease AI
-            </button>
-            <button
-              onClick={() => scrollToSection('triangulation')}
-              className={`px-3 py-1.5 rounded-full transition-colors ${
-                activeTabNav === 'triangulation' ? 'bg-white shadow-xs text-slate-950 font-bold' : 'hover:text-slate-950 hover:bg-white/50'
-              }`}
-            >
-              Triangulation
-            </button>
-            <button
-              onClick={() => scrollToSection('archetypes')}
-              className={`px-3 py-1.5 rounded-full transition-colors ${
-                activeTabNav === 'archetypes' ? 'bg-white shadow-xs text-slate-950 font-bold' : 'hover:text-slate-950 hover:bg-white/50'
-              }`}
-            >
-              Archetypes
-            </button>
-            <button
-              onClick={() => scrollToSection('evidence')}
-              className={`px-3 py-1.5 rounded-full transition-colors ${
-                activeTabNav === 'evidence' ? 'bg-white shadow-xs text-slate-950 font-bold' : 'hover:text-slate-950 hover:bg-white/50'
-              }`}
-            >
-              Clinical Guidelines
-            </button>
+          {/* Floating Pill Center Menu with Sliding Indicator */}
+          <nav
+            ref={navContainerRef}
+            className="relative hidden md:flex items-center bg-white/70 backdrop-blur-md border border-white/80 shadow-xs p-1 rounded-full text-xs font-semibold text-slate-700"
+          >
+            {/* Smooth animated sliding pill background */}
+            <div
+              className="absolute top-1 bottom-1 bg-white rounded-full shadow-xs border border-slate-200/60 transition-all duration-300 ease-out pointer-events-none"
+              style={{
+                left: `${indicatorStyle.left}px`,
+                width: `${indicatorStyle.width}px`,
+                opacity: indicatorStyle.opacity
+              }}
+            />
+
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeTabNav === item.id;
+              return (
+                <button
+                  key={item.id}
+                  ref={(el) => (navBtnRefs.current[item.id] = el)}
+                  onClick={() => scrollToSection(item.id)}
+                  className={`relative z-10 px-3.5 py-1.5 rounded-full transition-colors duration-200 ${
+                    isActive
+                      ? 'text-slate-950 font-bold'
+                      : 'text-slate-600 hover:text-slate-950'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Right Action: Launch Workspace */}
@@ -112,8 +195,8 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
       </header>
 
       {/* Hero Section */}
-      <main id="overview" className="pt-32 sm:pt-40 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center max-w-4xl mx-auto space-y-6">
+      <main id="overview" className="scroll-mt-24 pt-32 sm:pt-40 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center max-w-4xl mx-auto space-y-6 reveal-on-scroll is-revealed">
           {/* Eyebrow badge */}
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur border border-blue-200/60 shadow-xs text-blue-900 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
@@ -162,8 +245,8 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
         </div>
 
         {/* Hero Interactive Mockup Showcase Card */}
-        <div className="mt-14 max-w-5xl mx-auto">
-          <div className="relative rounded-3xl bg-white/90 backdrop-blur-xl border border-white/80 shadow-2xl p-6 sm:p-8 overflow-hidden">
+        <div className="mt-14 max-w-5xl mx-auto reveal-on-scroll is-revealed delay-100">
+          <div className="relative rounded-3xl bg-white/90 backdrop-blur-xl border border-white/80 shadow-2xl p-6 sm:p-8 overflow-hidden animate-subtleFloat">
             {/* Top Bar inside mockup */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-100">
               <div className="flex items-center space-x-3">
@@ -232,7 +315,7 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
                   </div>
                 </div>
 
-                {/* Dark Consensus Banner (like the reference card's black banner) */}
+                {/* Dark Consensus Banner */}
                 <div className="rounded-2xl bg-[#0c0d12] text-white p-4.5 sm:p-5 flex items-center justify-between shadow-lg">
                   <div>
                     <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
@@ -282,7 +365,7 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
                 </div>
               </div>
 
-              {/* Right Column: Quick Actions & Clinical Preview (like the right column of the reference mockup) */}
+              {/* Right Column: Quick Actions & Clinical Preview */}
               <div className="md:col-span-5 space-y-4">
                 {/* Yellow Quick Action card */}
                 <div 
@@ -354,8 +437,8 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
       </main>
 
       {/* Section 1: The Cardiometabolic Intersection / Dual-Disease Solution */}
-      <section id="solution" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
+      <section id="solution" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
+        <div className="text-center max-w-3xl mx-auto space-y-4 reveal-on-scroll">
           <span className="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
             Cardiometabolic Syndrome
           </span>
@@ -370,7 +453,7 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
         </div>
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition reveal-on-scroll delay-100">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold mb-4">
               <Heart className="w-6 h-6" />
             </div>
@@ -380,7 +463,7 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition reveal-on-scroll delay-200">
             <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold mb-4">
               <Droplets className="w-6 h-6" />
             </div>
@@ -390,7 +473,7 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition reveal-on-scroll delay-300">
             <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold mb-4">
               <Stethoscope className="w-6 h-6" />
             </div>
@@ -403,9 +486,9 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
       </section>
 
       {/* Section 2: 3-Model Triangulation Engine */}
-      <section id="triangulation" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60 bg-gradient-to-b from-white/60 to-transparent rounded-3xl">
+      <section id="triangulation" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60 bg-gradient-to-b from-white/60 to-transparent rounded-3xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-5 space-y-5">
+          <div className="lg:col-span-5 space-y-5 reveal-on-scroll">
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200">
               Reliable Machine Learning
             </span>
@@ -451,7 +534,7 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
             </div>
           </div>
 
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 reveal-on-scroll delay-200">
             <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div className="flex items-center space-x-2.5">
@@ -513,8 +596,8 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
       </section>
 
       {/* Section 3: Preloaded Clinical Archetypes Showcase */}
-      <section id="archetypes" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
+      <section id="archetypes" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
+        <div className="text-center max-w-3xl mx-auto space-y-4 reveal-on-scroll">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
             Rapid Benchmarking
           </span>
@@ -527,55 +610,58 @@ export default function LandingPage({ onEnterWorkspace, onSelectArchetypeAndEnte
         </div>
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {COHORT_ARCHETYPES.map((arch, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all flex flex-col justify-between group"
-            >
-              <div className="space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-sm">
-                  0{idx + 1}
-                </div>
-                <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                  {arch.label}
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  {arch.description}
-                </p>
-
-                <div className="pt-2 space-y-1.5 text-xs text-slate-600 border-t border-slate-100">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">BP / Heart Rate</span>
-                    <span className="font-semibold text-slate-800">{arch.heart.trestbps} mm Hg / {arch.heart.thalach} bpm</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Glucose / BMI</span>
-                    <span className="font-semibold text-slate-800">{arch.diabetes.glucose} mg/dL / {arch.diabetes.bmi}</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  if (onSelectArchetypeAndEnter) {
-                    onSelectArchetypeAndEnter(arch);
-                  } else {
-                    onEnterWorkspace();
-                  }
-                }}
-                className="mt-6 w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-800 text-xs font-bold transition-all flex items-center justify-center space-x-1.5"
+          {COHORT_ARCHETYPES.map((arch, idx) => {
+            const delayClass = idx === 0 ? 'delay-100' : idx === 1 ? 'delay-200' : idx === 2 ? 'delay-300' : 'delay-400';
+            return (
+              <div
+                key={idx}
+                className={`bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all flex flex-col justify-between group reveal-on-scroll ${delayClass}`}
               >
-                <span>Load in Workspace</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-sm">
+                    0{idx + 1}
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    {arch.label}
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {arch.description}
+                  </p>
+
+                  <div className="pt-2 space-y-1.5 text-xs text-slate-600 border-t border-slate-100">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">BP / Heart Rate</span>
+                      <span className="font-semibold text-slate-800">{arch.heart.trestbps} mm Hg / {arch.heart.thalach} bpm</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Glucose / BMI</span>
+                      <span className="font-semibold text-slate-800">{arch.diabetes.glucose} mg/dL / {arch.diabetes.bmi}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (onSelectArchetypeAndEnter) {
+                      onSelectArchetypeAndEnter(arch);
+                    } else {
+                      onEnterWorkspace();
+                    }
+                  }}
+                  className="mt-6 w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-800 text-xs font-bold transition-all flex items-center justify-center space-x-1.5"
+                >
+                  <span>Load in Workspace</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       {/* Section 4: Clinical Guidelines & Evidence Base */}
-      <section id="evidence" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
-        <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
+      <section id="evidence" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
+        <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl reveal-on-scroll delay-100">
           <div className="max-w-3xl space-y-6">
             <span className="text-xs font-bold uppercase tracking-wider text-blue-200 bg-blue-800/60 px-3 py-1 rounded-full border border-blue-400/30">
               Evidence-Based Medicine
