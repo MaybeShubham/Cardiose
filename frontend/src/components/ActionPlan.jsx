@@ -32,7 +32,7 @@ export default function ActionPlan({ actionPlan }) {
   ];
 
   return (
-    <div className="p-6 rounded-2xl bg-white border border-slate-200 backdrop-blur-md shadow-md">
+    <div className="p-6 rounded-2xl bg-white border border-slate-200 backdrop-blur-md shadow-md animate-reportEntrance">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-800">
           What To Do Next
@@ -50,7 +50,8 @@ export default function ActionPlan({ actionPlan }) {
         {categories.map((cat, idx) => (
           <div
             key={idx}
-            className={`p-4 rounded-xl bg-slate-50 border ${cat.borderColor} flex flex-col justify-between transition-all duration-300 shadow-sm`}
+            style={{ animationDelay: `${idx * 100}ms` }}
+            className={`p-4 rounded-xl bg-slate-50 border ${cat.borderColor} flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 animate-slideInRight`}
           >
             <div>
               <div className="flex items-center justify-between mb-3">

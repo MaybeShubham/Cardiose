@@ -1,5 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GitMerge } from 'lucide-react';
+
+function ModelRow({ model, delay = 0 }) {
+  const targetPct = Math.round(model.prob * 100);
+  const [animatedPct, setAnimatedPct] = useState(0);
+  const [barWidth, setBarWidth] = useState(0);
+
+  useEffect(() => {
+    setBarWidth(0);
+    const timer = setTimeout(() => {
+      setBarWidth(targetPct);
+    }, 60 + delay);
+
+    let startTimestamp = null;
+    const startVal = animatedPct;
+    const diff = targetPct - startVal;
+    if (diff === 0) return () => clearTimeout(timer);
+
+    let frameId;
+    const duration = 850;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setAnimatedPct(Math.round(startVal + diff * easeOut));
+      if (progress < 1) {
+        frameId = requestAnimationFrame(step);
+      }
+    };
+    frameId = requestAnimationFrame(step);
+
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(frameId);
+    };
+  }, [targetPct]);
+
+  return (
+    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 transition-all hover:border-slate-300">
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center space-x-2">
+          <span className={`px-1.5 py-0.5 text-[11px] font-mono font-bold rounded border ${model.badgeColor}`}>
+            {model.abbr}
+          </span>
+          <span className="text-sm font-semibold text-slate-800">{model.name}</span>
+        </div>
+        <div className="flex items-baseline space-x-1">
+          <span className="text-base font-bold text-slate-900">{animatedPct}%</span>
+          <span className="text-[11px] text-slate-500">risk</span>
+        </div>
+      </div>
+
+      {/* Animated Progress Bar */}
+      <div className="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden my-2">
+        <div
+          className={`h-full rounded-full bg-gradient-to-r ${model.color} transition-all duration-1000 ease-out`}
+          style={{ width: `${barWidth}%` }}
+        />
+      </div>
+
+      <p className="text-[11px] text-slate-600 leading-snug">
+        {model.role}
+      </p>
+    </div>
+  );
+}
 
 export default function ConsensusCard({ consensus }) {
   if (!consensus) return null;
@@ -39,7 +104,7 @@ export default function ConsensusCard({ consensus }) {
   const highAgreement = maxDiff <= 0.15;
 
   return (
-    <div className="p-6 rounded-2xl bg-white border border-slate-200 backdrop-blur-md shadow-md">
+    <div className="p-6 rounded-2xl bg-white border border-slate-200 backdrop-blur-md shadow-md animate-reportEntrance">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <GitMerge className="w-5 h-5 text-teal-600" />
@@ -47,7 +112,7 @@ export default function ConsensusCard({ consensus }) {
             3-Model Agreement
           </h3>
         </div>
-        <span className={`px-2 py-0.5 text-[11px] font-semibold rounded-full border ${
+        <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-all ${
           highAgreement
             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
             : 'bg-amber-50 text-amber-800 border-amber-200'
@@ -62,37 +127,9 @@ export default function ConsensusCard({ consensus }) {
 
       {/* Model Breakdown Cards */}
       <div className="space-y-4">
-        {models.map((m) => {
-          const percentage = Math.round(m.prob * 100);
-          return (
-            <div key={m.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center space-x-2">
-                  <span className={`px-1.5 py-0.5 text-[11px] font-mono font-bold rounded border ${m.badgeColor}`}>
-                    {m.abbr}
-                  </span>
-                  <span className="text-sm font-semibold text-slate-800">{m.name}</span>
-                </div>
-                <div className="flex items-baseline space-x-1">
-                  <span className="text-base font-bold text-slate-900">{percentage}%</span>
-                  <span className="text-[11px] text-slate-500">risk</span>
-                </div>
-              </div>
-
-              {/* Animated Progress Bar */}
-              <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden my-2">
-                <div
-                  className={`h-full rounded-full bg-gradient-to-r ${m.color} transition-all duration-700 ease-out`}
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-
-              <p className="text-[11px] text-slate-600 leading-snug">
-                {m.role}
-              </p>
-            </div>
-          );
-        })}
+        {models.map((m, idx) => (
+          <ModelRow key={m.id} model={m} delay={idx * 120} />
+        ))}
       </div>
     </div>
   );

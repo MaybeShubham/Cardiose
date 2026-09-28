@@ -401,9 +401,10 @@ export default function App() {
           {/* Screening Results Section (Displays when a screening is performed for the active track) */}
           {activeResult && (activeTab === 'heart' || activeTab === 'diabetes') && (
             <section
+              key={`report-${activeTab}-${activeResult.risk_score}-${activeResult.risk_level}`}
               ref={resultsRef}
               id="diagnostic-report-section"
-              className="mt-8 pt-8 border-t border-slate-200 space-y-6 scroll-mt-6 animate-fadeIn"
+              className="mt-8 pt-8 border-t border-slate-200 space-y-6 scroll-mt-6 animate-reportEntrance"
             >
               <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border shadow-sm ${
                 activeResult.risk_level === 'HIGH'

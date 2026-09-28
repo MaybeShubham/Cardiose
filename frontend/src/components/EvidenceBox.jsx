@@ -5,7 +5,7 @@ export default function EvidenceBox({ evidencePoints = [] }) {
   const isHealthy = evidencePoints.length === 1 && evidencePoints[0].includes('normative ranges');
 
   return (
-    <div className="p-6 rounded-2xl bg-white border border-slate-200 backdrop-blur-md shadow-md">
+    <div className="p-6 rounded-2xl bg-white border border-slate-200 backdrop-blur-md shadow-md animate-reportEntrance">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <Stethoscope className="w-5 h-5 text-rose-500" />
@@ -23,7 +23,7 @@ export default function EvidenceBox({ evidencePoints = [] }) {
       </p>
 
       {isHealthy ? (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start space-x-3">
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start space-x-3 animate-slideInRight">
           <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
           <p className="text-xs sm:text-sm text-emerald-800 leading-relaxed font-medium">
             {evidencePoints[0]}
@@ -34,7 +34,8 @@ export default function EvidenceBox({ evidencePoints = [] }) {
           {evidencePoints.map((point, index) => (
             <div
               key={index}
-              className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-3 transition-all hover:border-slate-300"
+              style={{ animationDelay: `${index * 80}ms` }}
+              className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-3 transition-all hover:border-slate-300 hover:bg-slate-100/60 animate-slideInRight shadow-2xs"
             >
               <div className="w-5 h-5 rounded-full bg-rose-100 border border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
                 <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
